@@ -1,8 +1,6 @@
-# script to join the friendships data with the user reply data
+# script to get the data present in graphs/*/*_users_replies_graph.csv and not in graphs1/*/*_users*
 
 import sys,glob,json;
-
-filename = sys.argv[1];
 
 f = open("mutual_following_data_all_US_politicians.txt");
 lines = f.readlines();
@@ -26,23 +24,34 @@ for line in lines:
 	except:
 		print >> sys.stderr, "fu";
 		pass;
-#		line_split = line.split("\t");
-#		dict_follow[line_split[0] + "," + line_split[1]] = line_split[2] + "," + line_split[3];
-
-for infile in glob.glob("graphs/" + filename + "/*_users_replies_graph.csv"):
-	out = open(infile.replace("graphs","graphs1"), "w");
-	f = open(infile);
-	lines = f.readlines();
-	for line in lines:
-		line = line.strip().lower();
+#
+for infile in glob.glob("graphs/*/*_users_replies_graph.csv"):
+	filename1 = infile.replace("graphs","graphs1");
+	filename2 = infile.replace("graphs","graphs2");
+	out = open(filename2, "w");
+	f1 = open(filename1);
+	lines1 = f1.readlines();
+	dict1 = {};
+	
+	for line in lines1:
+		line = line.strip();
 		line_split = line.split(",");
-		if(not dict_follow.has_key(line_split[0] + "," + line_split[1])):
+		dict1[line_split[0] + "," + line_split[1]] = line;
+	
+	f2 = open(infile);
+	lines2 = f2.readlines();
+
+	for line in lines2:
+		line = line.strip();
+		line_split = line.split(",");
+		if(not dict1.has_key(line_split[0] + "," + line_split[1])):
 			if(dict_follow.has_key(line_split[1] + "," + line_split[0])):
 				tmp_str = dict_follow[line_split[1] + "," + line_split[0]].split(",");
 				out.write(line_split[0] + "," + line_split[1] + "," + line_split[2] + "," + tmp_str[1] + "," + tmp_str[0] + "\n");
 			else:
 				out.write(line_split[0] + "," + line_split[1] + "," + line_split[2] + ",False,False\n");
-#			print >> sys.stderr, "sssssss";
-			continue;
-		out.write(line + "," + dict_follow[line_split[0] + "," + line_split[1]] + "\n");
+#			out.write(line_split[0] + "," + line_split[1] + "\n");# + "," + line_split[2] + ",False,False\n");
+		else:
+			out.write(dict1[line_split[0] + "," + line_split[1]] + "\n");
 	out.close();
+

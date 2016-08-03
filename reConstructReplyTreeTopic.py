@@ -21,6 +21,7 @@ def createGraph(all_files):
 			G.add_node(node[1]);
 			G1.add_node(node[1]);
 			if(node[1]!=root):
+#			if(node[0]!=root):
 				G.add_edge(node[0],node[1]);
 
 	# to arbitrarily break inconsistencies
@@ -30,7 +31,8 @@ def createGraph(all_files):
 			random_node = G.predecessors(node)[random.randint(0,len(G.predecessors(node))-1)];
 			if(random_node!=root):
 				G1.add_edge(node,random_node);
-	return G1;
+#	return G1;
+	return G;
 	
 def visualizeGraph(G1,tweetid):
 	pos=nx.graphviz_layout(G1,prog='dot')
@@ -151,6 +153,7 @@ def createUserGraph(G,dict_screenname):
 
 # folder_name = "tmp/";
 topic_name = sys.argv[1];
+#topic_name = "test";
 folder_name = "US_politicians_replies/";
 tweetid = sys.argv[2]; #"714855025055514624";
 screen_name = sys.argv[3];
@@ -198,10 +201,10 @@ for val in range(2,total_depth+1):
 #add(reply_tree1,['573518578739060736','573519233642020864','573521420527013888','4']);
 
 #pprint.pprint(dicts(reply_tree1));
-queue = [];
+#queue = [];
 
 root = reply_tree.keys()[0];
-queue.append(root); # push the root node
+#queue.append(root); # push the root node
 filename = "";
 tmp = [];
 count = 0;
@@ -229,7 +232,6 @@ for keys in dict_screenname.keys():
 dict_final_screenname_mapping = {tweetid:screen_name};
 dict_final_screenname_mapping.update(dict_screenname);
 
-
 dict_final_timestamp_mapping = {}; # mapping from reply edges to timestamps
 dict_final_timestamp_mapping.update(dict_timestamp);
 
@@ -237,13 +239,15 @@ dict_final_timestamp_mapping.update(dict_timestamp);
 for val in range(2,total_depth+1):
 	nodes = all_files[val];
 	for node in nodes:
-		root = node[-2];
+#		root = node[-2];
+		root = node[-1];
 		filename = ("_").join(node) + ".html";
 		dict_screenname, dict_timestamp = processHTML(folder_name + filename);
 		dict_final_screenname_mapping.update(dict_screenname);
 		dict_final_timestamp_mapping.update(dict_timestamp);
 		child_tweetids = dict_screenname.keys();
-#		print node, child_tweetids;
+#		print  node, child_tweetids;
+		"""
 		for i in range(len(child_tweetids)-1):
 			child_tweetid = child_tweetids[i];
 			child_tweetid1 = child_tweetids[i+1];
@@ -258,6 +262,13 @@ for val in range(2,total_depth+1):
 				G.add_node(child_tweetid1);
 				G.add_edge(child_tweetid,child_tweetid1);
 				already_in_tree[child_tweetid1] = 1;
+		"""
+		for i in range(len(child_tweetids)):
+			child_tweetid = child_tweetids[i];
+			if(not already_in_tree.has_key(child_tweetid)):
+				G.add_node(child_tweetid);
+				G.add_edge(root,child_tweetid);
+				already_in_tree[child_tweetid] = 1;
 
 		print >> sys.stderr, filename, len(dict_screenname.keys());
 		count += len(dict_screenname.keys());
